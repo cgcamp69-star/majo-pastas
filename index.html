@@ -543,6 +543,77 @@ Add this embed script immediately before the closing </body> tag on every page w
 </script>
 
 Keep the script exactly as provided. The id and domain identify the agent. After deploying, load the site and confirm the chat bubble appears in the corner of the page.
+<script>
+(function(){
+  const css = `
+  .agregar{font-family:inherit;background:#7A3B2A;color:#FFFDF8;border:none;padding:8px 12px;border-radius:3px;font-size:13px;cursor:pointer;margin-top:8px;display:block;margin-left:auto}
+  .agregar:hover{background:#632f21}
+  #carrito{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#223529;color:#F7F2E6;padding:12px 20px;border-radius:40px;display:flex;gap:14px;align-items:center;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:999;font-family:'Work Sans',sans-serif}
+  #carrito button{background:#E3A339;border:none;padding:8px 14px;border-radius:20px;font-weight:bold;cursor:pointer}
+  `;
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
 
+  const WHATSAPP = "5493513258169";
+  const carrito = {};
+  const formato = n => "$" + n.toLocaleString("es-AR");
+
+  document.querySelectorAll('.menu-item').forEach(item => {
+    const nombreEl = item.querySelector('.menu-name');
+    const precioEl = item.querySelector('.menu-price');
+    if (!nombreEl || !precioEl) return;
+    const nombre = nombreEl.textContent.trim();
+    const precio = Number(precioEl.textContent.replace(/\D/g, ''));
+    if (!nombre || !precio) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'agregar';
+    btn.textContent = '+ Añadir al carrito';
+    btn.addEventListener('click', () => {
+      if (!carrito[nombre]) carrito[nombre] = { cant: 0, precio };
+      carrito[nombre].cant++;
+      actualizar();
+    });
+    precioEl.appendChild(btn);
+  });
+
+  const cart = document.createElement('div');
+  cart.id = 'carrito';
+  cart.innerHTML = '<span><span id="cant">0</span> productos · <strong id="total">$0</strong></span><button id="btnComprar">Comprar</button>';
+  document.body.appendChild(cart);
+  document.getElementById('btnComprar').addEventListener('click', comprar);
+
+  function actualizar() {
+    let cant = 0, total = 0;
+    for (const n in carrito) {
+      cant += carrito[n].cant;
+      total += carrito[n].cant * carrito[n].precio;
+    }
+    document.getElementById('cant').textContent = cant;
+    document.getElementById('total').textContent = formato(total);
+  }
+
+  function comprar() {
+    const items = Object.entries(carrito);
+    if (items.length === 0) {
+      alert("Agregá al menos una pasta primero");
+      return;
+    }
+    let total = 0;
+    const lineas = items.map(([nombre, item]) => {
+      const subtotal = item.cant * item.precio;
+      total += subtotal;
+      return - ${item.cant} x ${nombre} (${formato(subtotal)});
+    });
+    const mensaje =
+      "¡Hola! Quiero hacer este pedido de MAJO:\n\n" +
+      lineas.join("\n") +
+      \n\nTotal: ${formato(total)}\n\n +
+      "Nombre:\nDirección de entrega:\nForma de pago:";
+    window.open(https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}, "_blank");
+  }
+})();
+</script>
 </body>
 </html>
